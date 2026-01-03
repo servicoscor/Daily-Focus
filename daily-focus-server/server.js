@@ -314,6 +314,167 @@ app.delete('/api/transactions/:id', (req, res) => {
 });
 
 // ============================================
+// ROTAS - BUDGETS (ORÇAMENTO)
+// ============================================
+
+// Listar todos os orçamentos
+app.get('/api/budgets', (req, res) => {
+    const db = readDB();
+    const userId = req.query.userId;
+    
+    if (userId) {
+        const userBudgets = db.budgets.filter(b => b.userId === parseInt(userId));
+        res.json(userBudgets);
+    } else {
+        res.json(db.budgets);
+    }
+});
+
+// Buscar orçamento por ID de transação
+app.get('/api/budgets/transaction/:transactionId', (req, res) => {
+    const db = readDB();
+    const budget = db.budgets.find(b => b.transactionId === parseInt(req.params.transactionId));
+    
+    if (budget) {
+        res.json(budget);
+    } else {
+        res.status(404).json({ error: 'Orçamento não encontrado' });
+    }
+});
+
+// Buscar resumo do orçamento do usuário
+app.get('/api/budgets/summary/:userId', (req, res) => {
+    const db = readDB();
+    const userId = parseInt(req.params.userId);
+    
+    // Pegar todos os orçamentos do usuário
+    const userBudgets = db.budgets.filter(b => b.userId === userId);
+    
+    if (userBudgets.length === 0) {
+        return res.json({ categories: [] });
+    }
+    
+    // Agregar por categoria
+    const categoryMap = {};
+    
+    userBudgets.forEach(budget => {
+        budget.allocations.forEach(alloc => {
+            if (!categoryMap[alloc.category]) {
+                categoryMap[alloc.category] = {
+                    category: alloc.category,
+                    planned: 0,
+                    spent: 0
+                };
+            }
+            categoryMap[alloc.category].planned += alloc.planned || 0;
+            categoryMap[alloc.category].spent += alloc.spent || 0;
+        });
+    });
+    
+    const categories = Object.values(categoryMap);
+    
+    res.json({ categories });
+});
+
+// Criar novo orçamento
+app.post('/api/budgets', (req, res) => {
+    const db = readDB();
+    
+    const newBudget = {
+        id: db.budgets.length > 0 ? Math.max(...db.budgets.map(b => b.id)) + 1 : 1,
+        userId: req.body.userId,
+        transactionId: req.body.transactionId,
+        allocations: req.body.allocations,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+    };
+    
+    db.budgets.push(newBudget);
+    
+    if (writeDB(db)) {
+        console.log('✅ Novo orçamento criado para transação:', newBudget.transactionId);
+        res.status(201).json(newBudget);
+    } else {
+        res.status(500).json({ error: 'Erro ao salvar orçamento' });
+    }
+});
+
+// Atualizar orçamento
+app.put('/api/budgets/:id', (req, res) => {
+    const db = readDB();
+    const budgetIndex = db.budgets.findIndex(b => b.id === parseInt(req.params.id));
+    
+    if (budgetIndex === -1) {
+        return res.status(404).json({ error: 'Orçamento não encontrado' });
+    }
+    
+    db.budgets[budgetIndex] = {
+        ...db.budgets[budgetIndex],
+        ...req.body,
+        id: parseInt(req.params.id),
+        updatedAt: new Date().toISOString()
+    };
+    
+    if (writeDB(db)) {
+        console.log('✅ Orçamento atualizado');
+        res.json(db.budgets[budgetIndex]);
+    } else {
+        res.status(500).json({ error: 'Erro ao atualizar orçamento' });
+    }
+});
+
+// Atualizar gastos de uma categoria
+app.put('/api/budgets/update-spent/:userId/:category', (req, res) => {
+    const db = readDB();
+    const userId = parseInt(req.params.userId);
+    const category = req.params.category;
+    const amount = req.body.amount;
+    
+    // Encontrar todos os orçamentos do usuário que têm essa categoria
+    const userBudgets = db.budgets.filter(b => b.userId === userId);
+    
+    let updated = false;
+    userBudgets.forEach((budget, budgetIndex) => {
+        const allocIndex = budget.allocations.findIndex(a => a.category === category);
+        if (allocIndex !== -1) {
+            const realBudgetIndex = db.budgets.findIndex(b => b.id === budget.id);
+            db.budgets[realBudgetIndex].allocations[allocIndex].spent = 
+                (db.budgets[realBudgetIndex].allocations[allocIndex].spent || 0) + amount;
+            updated = true;
+        }
+    });
+    
+    if (updated && writeDB(db)) {
+        console.log(`✅ Gasto atualizado: ${category} +${amount}`);
+        res.json({ message: 'Gasto atualizado com sucesso' });
+    } else if (!updated) {
+        res.status(404).json({ error: 'Categoria não encontrada no orçamento' });
+    } else {
+        res.status(500).json({ error: 'Erro ao atualizar gasto' });
+    }
+});
+
+// Deletar orçamento
+app.delete('/api/budgets/:id', (req, res) => {
+    const db = readDB();
+    const budgetIndex = db.budgets.findIndex(b => b.id === parseInt(req.params.id));
+    
+    if (budgetIndex === -1) {
+        return res.status(404).json({ error: 'Orçamento não encontrado' });
+    }
+    
+    const deletedBudget = db.budgets[budgetIndex];
+    db.budgets.splice(budgetIndex, 1);
+    
+    if (writeDB(db)) {
+        console.log('✅ Orçamento deletado');
+        res.json({ message: 'Orçamento deletado com sucesso', budget: deletedBudget });
+    } else {
+        res.status(500).json({ error: 'Erro ao deletar orçamento' });
+    }
+});
+
+// ============================================
 // ROTAS - BACKUP
 // ============================================
 

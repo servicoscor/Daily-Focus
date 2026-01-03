@@ -33,6 +33,30 @@
       "notes": "",
       "createdAt": "2026-01-03T01:55:40.922Z",
       "updatedAt": "2026-01-03T01:55:40.922Z"
+    },
+    {
+      "id": 2,
+      "userId": 1,
+      "type": "income",
+      "description": "da",
+      "amount": 1231,
+      "category": "Salário",
+      "date": "2026-01-03",
+      "notes": "",
+      "createdAt": "2026-01-03T02:18:09.899Z",
+      "updatedAt": "2026-01-03T02:18:09.899Z"
+    },
+    {
+      "id": 3,
+      "userId": 1,
+      "type": "income",
+      "description": "da",
+      "amount": 1231,
+      "category": "Salário",
+      "date": "2026-01-03",
+      "notes": "",
+      "createdAt": "2026-01-03T02:30:06.304Z",
+      "updatedAt": "2026-01-03T02:30:06.304Z"
     }
   ]
 }

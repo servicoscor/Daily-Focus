@@ -295,6 +295,24 @@
 
                 <div class="stats-grid" id="finance-stats-grid"></div>
 
+                <!-- Budget Dashboard -->
+                <div class="budget-section">
+                    <h3 class="section-title">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                        Orçamento por Categoria
+                    </h3>
+                    <div id="budget-dashboard"></div>
+                </div>
+
+                <h3 class="section-title" style="margin-top: 2rem;">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Histórico de Transações
+                </h3>
+
                 <div class="filters">
                     <div class="filter-group">
                         <span class="filter-label">Tipo:</span>
@@ -479,6 +497,44 @@
                     <button type="submit" class="btn btn-primary" id="finance-submit-btn">Salvar</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Budget Allocation Modal -->
+    <div class="modal" id="budget-modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 id="budget-modal-title">💰 Alocar Receita</h3>
+                <button class="btn btn-icon btn-secondary" onclick="closeBudgetModal()">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="budget-header-info">
+                    <div class="budget-info-item">
+                        <span class="budget-info-label">Total da Receita:</span>
+                        <span class="budget-info-value" id="budget-total-amount">R$ 0,00</span>
+                    </div>
+                    <div class="budget-info-item">
+                        <span class="budget-info-label">Total Alocado:</span>
+                        <span class="budget-info-value" id="budget-allocated">R$ 0,00</span>
+                    </div>
+                    <div class="budget-info-item">
+                        <span class="budget-info-label">Restante:</span>
+                        <span class="budget-info-value" id="budget-remaining">R$ 0,00</span>
+                    </div>
+                </div>
+                
+                <div id="budget-allocations-container" class="budget-allocations-container">
+                    <!-- Budget allocations will be rendered here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeBudgetModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="saveBudgetAllocation()">Salvar Alocação</button>
+            </div>
         </div>
     </div>
 

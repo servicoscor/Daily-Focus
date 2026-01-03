@@ -30,6 +30,20 @@ const CATEGORIES = {
     ]
 };
 
+// Categorias de Orçamento (Budget)
+const BUDGET_CATEGORIES = [
+    { name: 'Moradia', icon: '🏠', color: '#3b82f6' },
+    { name: 'Alimentação', icon: '🍔', color: '#10b981' },
+    { name: 'Transporte', icon: '🚗', color: '#f59e0b' },
+    { name: 'Saúde', icon: '💊', color: '#ef4444' },
+    { name: 'Educação', icon: '📚', color: '#8b5cf6' },
+    { name: 'Lazer', icon: '🎮', color: '#ec4899' },
+    { name: 'Compras', icon: '🛍️', color: '#14b8a6' },
+    { name: 'Contas', icon: '💡', color: '#f97316' },
+    { name: 'Poupança', icon: '💰', color: '#22c55e' },
+    { name: 'Outros', icon: '📦', color: '#64748b' }
+];
+
 // ============================================
 // API CLIENT
 // ============================================
@@ -137,6 +151,46 @@ class API {
             body: JSON.stringify(data)
         });
     }
+
+    // Budgets (Orçamento)
+    static async getBudgets(userId) {
+        return this.request(`/budgets?userId=${userId}`);
+    }
+
+    static async getBudgetByTransaction(transactionId) {
+        return this.request(`/budgets/transaction/${transactionId}`);
+    }
+
+    static async getBudgetSummary(userId) {
+        return this.request(`/budgets/summary/${userId}`);
+    }
+
+    static async createBudget(budget) {
+        return this.request('/budgets', {
+            method: 'POST',
+            body: JSON.stringify(budget)
+        });
+    }
+
+    static async updateBudget(id, budget) {
+        return this.request(`/budgets/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(budget)
+        });
+    }
+
+    static async updateSpent(userId, category, amount) {
+        return this.request(`/budgets/update-spent/${userId}/${category}`, {
+            method: 'PUT',
+            body: JSON.stringify({ amount })
+        });
+    }
+
+    static async deleteBudget(id) {
+        return this.request(`/budgets/${id}`, {
+            method: 'DELETE'
+        });
+    }
 }
 
 // ============================================
@@ -194,10 +248,12 @@ const autoSave = new AutoSave();
 let currentUser = null;
 let tasks = [];
 let transactions = [];
+let budgets = [];
 let currentView = 'tasks';
 let editingTaskId = null;
 let editingTransactionId = null;
 let currentTransactionType = 'income';
+let currentBudgetTransaction = null;
 
 // ============================================
 // INITIALIZATION
@@ -308,11 +364,13 @@ async function loginUser(user) {
     try {
         tasks = await API.getTasks(user.id);
         transactions = await API.getTransactions(user.id);
-        console.log(`✅ Loaded ${tasks.length} tasks and ${transactions.length} transactions from server`);
+        budgets = await API.getBudgets(user.id);
+        console.log(`✅ Loaded ${tasks.length} tasks, ${transactions.length} transactions and ${budgets.length} budgets from server`);
     } catch (error) {
         console.error('Error loading data:', error);
         tasks = [];
         transactions = [];
+        budgets = [];
     }
     
     document.getElementById('user-name').textContent = user.name;
@@ -514,11 +572,24 @@ async function saveTransaction() {
             
             const createdTx = await API.createTransaction(newTransaction);
             transactions.push(createdTx);
+            
+            // Se for despesa, atualizar gasto na categoria do orçamento
+            if (currentTransactionType === 'expense') {
+                try {
+                    await API.updateSpent(currentUser.id, category, amount);
+                    budgets = await API.getBudgets(currentUser.id);
+                } catch (error) {
+                    console.log('Categoria não está no orçamento ou orçamento não existe ainda');
+                }
+            }
         }
     });
     
     renderTransactions();
     updateAllStats();
+    if (currentView === 'finance') {
+        renderBudgetDashboard();
+    }
     closeFinanceModal();
 }
 
@@ -626,6 +697,7 @@ function switchView(view) {
     } else if (view === 'finance') {
         document.getElementById('finance-view').style.display = 'block';
         renderFinanceStats();
+        renderBudgetDashboard();
     } else if (view === 'analytics') {
         document.getElementById('analytics-view').style.display = 'block';
         renderAnalytics();
@@ -952,6 +1024,13 @@ function renderTransactions() {
                             ${tx.type === 'income' ? '+' : '-'} R$ ${tx.amount.toFixed(2)}
                         </div>
                         <div class="transaction-actions">
+                            ${tx.type === 'income' ? `
+                                <button class="btn btn-sm btn-success" onclick="openBudgetModal(transactions.find(t => t.id === ${tx.id}))" title="Alocar Orçamento">
+                                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                    </svg>
+                                </button>
+                            ` : ''}
                             <button class="btn btn-sm btn-secondary" onclick="openFinanceModal('${tx.type}', ${tx.id})" title="Editar">
                                 <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -1154,6 +1233,256 @@ function renderAnalytics() {
     document.getElementById('analytics-balance').textContent = `R$ ${balance.toFixed(2)}`;
     document.getElementById('analytics-balance').style.color = balance >= 0 ? 'var(--success)' : 'var(--danger)';
     document.getElementById('productivity-score').textContent = `${taskStats.completion}%`;
+}
+
+// ============================================
+// BUDGET MANAGEMENT (ORÇAMENTO)
+// ============================================
+
+function openBudgetModal(transaction) {
+    currentBudgetTransaction = transaction;
+    const modal = document.getElementById('budget-modal');
+    
+    document.getElementById('budget-modal-title').textContent = `💰 Alocar Receita: R$ ${transaction.amount.toFixed(2)}`;
+    document.getElementById('budget-total-amount').textContent = `R$ ${transaction.amount.toFixed(2)}`;
+    
+    // Carregar alocação existente se houver
+    loadBudgetAllocations(transaction.id, transaction.amount);
+    
+    modal.classList.add('active');
+}
+
+function closeBudgetModal() {
+    document.getElementById('budget-modal').classList.remove('active');
+    currentBudgetTransaction = null;
+}
+
+async function loadBudgetAllocations(transactionId, totalAmount) {
+    try {
+        const budget = await API.getBudgetByTransaction(transactionId);
+        
+        if (budget && budget.allocations) {
+            renderBudgetAllocations(budget.allocations, totalAmount);
+        } else {
+            // Criar alocações vazias
+            const emptyAllocations = BUDGET_CATEGORIES.map(cat => ({
+                category: cat.name,
+                planned: 0,
+                spent: 0
+            }));
+            renderBudgetAllocations(emptyAllocations, totalAmount);
+        }
+    } catch (error) {
+        // Criar alocações vazias se não existir
+        const emptyAllocations = BUDGET_CATEGORIES.map(cat => ({
+            category: cat.name,
+            planned: 0,
+            spent: 0
+        }));
+        renderBudgetAllocations(emptyAllocations, totalAmount);
+    }
+}
+
+function renderBudgetAllocations(allocations, totalAmount) {
+    const container = document.getElementById('budget-allocations-container');
+    
+    let totalAllocated = allocations.reduce((sum, a) => sum + (a.planned || 0), 0);
+    
+    container.innerHTML = BUDGET_CATEGORIES.map((cat, index) => {
+        const allocation = allocations.find(a => a.category === cat.name) || { planned: 0, spent: 0 };
+        const percentage = totalAmount > 0 ? ((allocation.planned / totalAmount) * 100).toFixed(1) : 0;
+        
+        return `
+            <div class="budget-allocation-item">
+                <div class="budget-category-header">
+                    <span class="budget-category-icon">${cat.icon}</span>
+                    <span class="budget-category-name">${cat.name}</span>
+                    <span class="budget-category-percent">${percentage}%</span>
+                </div>
+                <div class="budget-input-group">
+                    <span class="currency-symbol">R$</span>
+                    <input 
+                        type="number" 
+                        step="0.01" 
+                        min="0"
+                        class="budget-input" 
+                        data-category="${cat.name}"
+                        value="${allocation.planned}"
+                        onchange="updateBudgetAllocation('${cat.name}', this.value, ${totalAmount})"
+                        placeholder="0.00"
+                    >
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    updateBudgetTotals(totalAmount);
+}
+
+function updateBudgetAllocation(category, value, totalAmount) {
+    updateBudgetTotals(totalAmount);
+}
+
+function updateBudgetTotals(totalAmount) {
+    const inputs = document.querySelectorAll('.budget-input');
+    let totalAllocated = 0;
+    
+    inputs.forEach(input => {
+        totalAllocated += parseFloat(input.value) || 0;
+    });
+    
+    const remaining = totalAmount - totalAllocated;
+    
+    document.getElementById('budget-allocated').textContent = `R$ ${totalAllocated.toFixed(2)}`;
+    document.getElementById('budget-remaining').textContent = `R$ ${remaining.toFixed(2)}`;
+    
+    const remainingEl = document.getElementById('budget-remaining');
+    if (remaining < 0) {
+        remainingEl.style.color = 'var(--danger)';
+    } else if (remaining === 0) {
+        remainingEl.style.color = 'var(--success)';
+    } else {
+        remainingEl.style.color = 'var(--warning)';
+    }
+}
+
+async function saveBudgetAllocation() {
+    if (!currentBudgetTransaction) return;
+    
+    const inputs = document.querySelectorAll('.budget-input');
+    const allocations = [];
+    
+    inputs.forEach(input => {
+        const category = input.dataset.category;
+        const planned = parseFloat(input.value) || 0;
+        
+        if (planned > 0) {
+            allocations.push({
+                category,
+                planned,
+                spent: 0
+            });
+        }
+    });
+    
+    if (allocations.length === 0) {
+        alert('Por favor, aloque pelo menos uma categoria!');
+        return;
+    }
+    
+    await autoSave.save(async () => {
+        try {
+            // Verificar se já existe orçamento para essa transação
+            const existingBudget = await API.getBudgetByTransaction(currentBudgetTransaction.id);
+            
+            if (existingBudget) {
+                await API.updateBudget(existingBudget.id, { allocations });
+            } else {
+                await API.createBudget({
+                    userId: currentUser.id,
+                    transactionId: currentBudgetTransaction.id,
+                    allocations
+                });
+            }
+            
+            budgets = await API.getBudgets(currentUser.id);
+        } catch (error) {
+            throw error;
+        }
+    });
+    
+    closeBudgetModal();
+    if (currentView === 'finance') {
+        renderBudgetDashboard();
+    }
+}
+
+async function renderBudgetDashboard() {
+    try {
+        const summary = await API.getBudgetSummary(currentUser.id);
+        const container = document.getElementById('budget-dashboard');
+        
+        if (!summary || !summary.categories || summary.categories.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <svg class="empty-state-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                    </svg>
+                    <h3 style="margin-bottom: 0.5rem;">Nenhum orçamento criado</h3>
+                    <p>Clique em uma receita para criar seu orçamento!</p>
+                </div>
+            `;
+            return;
+        }
+        
+        const totalPlanned = summary.categories.reduce((sum, c) => sum + c.planned, 0);
+        const totalSpent = summary.categories.reduce((sum, c) => sum + c.spent, 0);
+        
+        container.innerHTML = `
+            <div class="budget-summary-header">
+                <div class="budget-summary-card">
+                    <div class="budget-summary-label">Orçamento Total</div>
+                    <div class="budget-summary-value">R$ ${totalPlanned.toFixed(2)}</div>
+                </div>
+                <div class="budget-summary-card">
+                    <div class="budget-summary-label">Gasto Total</div>
+                    <div class="budget-summary-value" style="color: var(--expense)">R$ ${totalSpent.toFixed(2)}</div>
+                </div>
+                <div class="budget-summary-card">
+                    <div class="budget-summary-label">Disponível</div>
+                    <div class="budget-summary-value" style="color: ${totalPlanned - totalSpent >= 0 ? 'var(--success)' : 'var(--danger)'}">
+                        R$ ${(totalPlanned - totalSpent).toFixed(2)}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="budget-categories-grid">
+                ${summary.categories.map(cat => {
+                    const budgetCat = BUDGET_CATEGORIES.find(bc => bc.name === cat.category);
+                    const icon = budgetCat ? budgetCat.icon : '📦';
+                    const percentage = cat.planned > 0 ? (cat.spent / cat.planned) * 100 : 0;
+                    const remaining = cat.planned - cat.spent;
+                    
+                    let statusClass = 'normal';
+                    if (percentage > 100) statusClass = 'over';
+                    else if (percentage > 80) statusClass = 'warning';
+                    
+                    return `
+                        <div class="budget-category-card ${statusClass}">
+                            <div class="budget-card-header">
+                                <span class="budget-card-icon">${icon}</span>
+                                <span class="budget-card-title">${cat.category}</span>
+                            </div>
+                            <div class="budget-card-amounts">
+                                <div class="budget-card-row">
+                                    <span class="budget-card-label">Planejado:</span>
+                                    <span class="budget-card-value">R$ ${cat.planned.toFixed(2)}</span>
+                                </div>
+                                <div class="budget-card-row">
+                                    <span class="budget-card-label">Gasto:</span>
+                                    <span class="budget-card-value spent">R$ ${cat.spent.toFixed(2)}</span>
+                                </div>
+                                <div class="budget-card-row">
+                                    <span class="budget-card-label">Restante:</span>
+                                    <span class="budget-card-value ${remaining >= 0 ? 'positive' : 'negative'}">
+                                        R$ ${Math.abs(remaining).toFixed(2)} ${remaining >= 0 ? '' : '(acima)'}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="budget-progress-container">
+                                <div class="budget-progress-bar">
+                                    <div class="budget-progress-fill ${statusClass}" style="width: ${Math.min(percentage, 100)}%"></div>
+                                </div>
+                                <span class="budget-progress-text">${percentage.toFixed(1)}%</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+    } catch (error) {
+        console.error('Error rendering budget dashboard:', error);
+    }
 }
 
 console.log('✅ Daily Focus v4.0.0 carregado - Conectado ao servidor!');
