@@ -44,6 +44,74 @@ const BUDGET_CATEGORIES = [
     { name: 'Outros', icon: '📦', color: '#64748b' }
 ];
 
+
+// ============================================
+// THEME TOGGLE SYSTEM
+// Cole esse código NO FINAL do seu script.js
+// ============================================
+
+// Theme Toggle Functionality
+function initThemeToggle() {
+    // Criar botão de theme toggle
+    const themeToggleBtn = document.createElement('button');
+    themeToggleBtn.id = 'theme-toggle';
+    themeToggleBtn.className = 'theme-toggle-btn';
+    themeToggleBtn.innerHTML = `
+        <svg class="sun-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+        </svg>
+        <svg class="moon-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+        </svg>
+    `;
+    
+    // Adicionar ao header
+    const headerActions = document.querySelector('.header-actions');
+    if (headerActions) {
+        headerActions.insertBefore(themeToggleBtn, headerActions.firstChild);
+    }
+    
+    // Carregar tema salvo
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+    
+    // Event listener
+    themeToggleBtn.addEventListener('click', toggleTheme);
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon(newTheme);
+    
+    // Animação suave
+    document.body.style.transition = 'background-color 0.3s ease, color 0.3s ease';
+}
+
+function updateThemeIcon(theme) {
+    const btn = document.getElementById('theme-toggle');
+    if (!btn) return;
+    
+    if (theme === 'dark') {
+        btn.classList.remove('light-mode');
+        btn.classList.add('dark-mode');
+    } else {
+        btn.classList.remove('dark-mode');
+        btn.classList.add('light-mode');
+    }
+}
+
+// Inicializar theme toggle quando a página carregar
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initThemeToggle);
+} else {
+    initThemeToggle();
+}
+
 // ============================================
 // API CLIENT
 // ============================================
