@@ -1,13 +1,390 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Focus | Task & Finance Management</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=20260127">
 </head>
+
 <body>
+
+    <!-- ============================================
+     PROFILE PAGE
+     Cole esse código dentro do <div class="main-content"> no index.html
+     ============================================ -->
+
+    <div id="profile-view" class="hidden">
+        <div class="header">
+            <h2>Meu Perfil</h2>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="showView('app')">
+                    Voltar
+                </button>
+                <button class="btn btn-secondary" onclick="cancelProfileEdit()">
+                    Cancelar
+                </button>
+                <button class="btn btn-primary" onclick="saveProfile()">
+                    💾 Salvar Alterações
+                </button>
+            </div>
+        </div>
+
+        <!-- Profile Card -->
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-avatar-container">
+                    <div class="profile-avatar" id="profile-avatar">
+                        <span id="avatar-initials">JW</span>
+                        <img id="avatar-image" style="display: none;">
+                    </div>
+                    <button class="btn-avatar-upload" onclick="document.getElementById('avatar-input').click()">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z">
+                            </path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </button>
+                    <input type="file" id="avatar-input" accept="image/*" style="display: none;"
+                        onchange="handleAvatarUpload(event)">
+                </div>
+
+                <div class="profile-info">
+                    <h3 id="profile-display-name">Jo??o Silva</h3>
+                    <p id="profile-display-email">joao@email.com</p>
+                    <div class="profile-badges">
+                        <span class="profile-badge">Membro desde 2026</span>
+                        <span class="profile-badge accent" id="profile-productivity-badge">Produtividade 0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="profile-stats">
+                <div class="profile-stat-item">
+                    <div class="profile-stat-icon"
+                        style="background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                            </path>
+                        </svg>
+                    </div>
+                    <div class="profile-stat-content">
+                        <span class="profile-stat-label">Total de Tarefas</span>
+                        <span class="profile-stat-value" id="stat-total-tasks">0</span>
+                    </div>
+                </div>
+
+                <div class="profile-stat-item">
+                    <div class="profile-stat-icon"
+                        style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="profile-stat-content">
+                        <span class="profile-stat-label">Tarefas Completas</span>
+                        <span class="profile-stat-value" id="stat-completed-tasks">0</span>
+                    </div>
+                </div>
+
+                <div class="profile-stat-item">
+                    <div class="profile-stat-icon"
+                        style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                            </path>
+                        </svg>
+                    </div>
+                    <div class="profile-stat-content">
+                        <span class="profile-stat-label">Total em Receitas</span>
+                        <span class="profile-stat-value" id="stat-total-income">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <div class="profile-stat-item">
+                    <div class="profile-stat-icon"
+                        style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
+                            </path>
+                        </svg>
+                    </div>
+                    <div class="profile-stat-content">
+                        <span class="profile-stat-label">Total em Despesas</span>
+                        <span class="profile-stat-value" id="stat-total-expense">R$ 0,00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="profile-sections">
+
+            <section class="profile-section full">
+                <div class="section-heading">
+                    <h3 class="section-title">Perfil de apresentacao</h3>
+                    <div class="profile-visibility">
+                        <span class="section-pill" id="profile-visibility-label">Privado</span>
+                        <label class="preference-control">
+                            <input type="checkbox" class="preference-toggle" id="profile-visibility-toggle">
+                            <span class="preference-switch"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="presentation-grid">
+                    <div class="presentation-form">
+                        <div class="form-group">
+                            <label class="form-label">Headline / Cargo</label>
+                            <input type="text" class="form-control" id="profile-headline" placeholder="Ex: Designer de Produto">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Bio curta</label>
+                            <textarea class="form-control" id="profile-bio" placeholder="Conte um pouco sobre voce"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Local</label>
+                            <input type="text" class="form-control" id="profile-location" placeholder="Cidade, Pais">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Disponibilidade</label>
+                            <select class="form-control" id="profile-availability">
+                                <option value="Disponivel">Disponivel</option>
+                                <option value="Parcerias">Parcerias</option>
+                                <option value="Freelancer">Freelancer</option>
+                                <option value="Indisponivel">Indisponivel</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Habilidades (separe por virgula)</label>
+                            <input type="text" class="form-control" id="profile-skills" placeholder="UX, UI, Financas">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Contato publico</label>
+                            <input type="text" class="form-control" id="profile-contact" placeholder="email@exemplo.com">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Website</label>
+                            <input type="text" class="form-control" id="profile-website" placeholder="https://">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">LinkedIn</label>
+                            <input type="text" class="form-control" id="profile-linkedin" placeholder="https://linkedin.com/in/">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Instagram</label>
+                            <input type="text" class="form-control" id="profile-instagram" placeholder="https://instagram.com/">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">WhatsApp</label>
+                            <input type="text" class="form-control" id="profile-whatsapp" placeholder="+55 11 99999-9999">
+                        </div>
+                    </div>
+                    <div class="presentation-preview">
+                        <div class="preview-card">
+                            <div class="preview-header">
+                                <div>
+                                    <div class="preview-name" id="profile-preview-name">Usuario</div>
+                                    <div class="preview-headline" id="profile-preview-headline">Headline nao definido</div>
+                                </div>
+                                <span class="preview-status" id="profile-preview-availability">Disponivel</span>
+                            </div>
+                            <p class="preview-bio" id="profile-preview-bio">Sem bio publicada.</p>
+                            <div class="preview-meta">
+                                <span id="profile-preview-location">Local nao informado</span>
+                                <span id="profile-preview-contact">Contato nao informado</span>
+                            </div>
+                            <div class="preview-links" id="profile-preview-links"></div>
+                            <div class="preview-skills" id="profile-preview-skills"></div>
+                            <div class="preview-visibility" id="profile-preview-visibility"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="profile-section full">
+                <h3 class="section-title">Resumo do desempenho</h3>
+                <div class="overview-grid">
+                    <div class="overview-card">
+                        <span class="overview-label">Total de tarefas</span>
+                        <span class="overview-value" id="profile-overview-total">0</span>
+                        <span class="overview-meta">Vis??o geral</span>
+                    </div>
+                    <div class="overview-card">
+                        <span class="overview-label">Conclu??das</span>
+                        <span class="overview-value" id="profile-overview-completed">0</span>
+                        <span class="overview-meta">Finalizadas</span>
+                    </div>
+                    <div class="overview-card">
+                        <span class="overview-label">Em andamento</span>
+                        <span class="overview-value" id="profile-overview-progress">0</span>
+                        <span class="overview-meta">Ativas</span>
+                    </div>
+                    <div class="overview-card">
+                        <span class="overview-label">Pendentes</span>
+                        <span class="overview-value" id="profile-overview-pending">0</span>
+                        <span class="overview-meta">Aguardando in??cio</span>
+                    </div>
+                    <div class="overview-card">
+                        <span class="overview-label">Atrasadas</span>
+                        <span class="overview-value" id="profile-overview-overdue">0</span>
+                        <span class="overview-meta">Requer aten????o</span>
+                    </div>
+                    <div class="overview-card highlight">
+                        <span class="overview-label">Produtividade</span>
+                        <span class="overview-value" id="profile-overview-score">0%</span>
+                        <span class="overview-meta">Score geral</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="profile-section">
+                <h3 class="section-title">Foco da semana</h3>
+                <div class="focus-list" id="profile-focus-list"></div>
+            </section>
+
+            <section class="profile-section">
+                <div class="section-heading">
+                    <h3 class="section-title">Financeiro do mês</h3>
+                    <span class="section-pill" id="profile-finance-period">-</span>
+                </div>
+                <div class="profile-finance-cards">
+                    <div class="finance-card">
+                        <span class="finance-label">Receitas</span>
+                        <span class="finance-value income" id="profile-finance-income">R$ 0,00</span>
+                    </div>
+                    <div class="finance-card">
+                        <span class="finance-label">Despesas</span>
+                        <span class="finance-value expense" id="profile-finance-expense">R$ 0,00</span>
+                    </div>
+                    <div class="finance-card">
+                        <span class="finance-label">Saldo</span>
+                        <span class="finance-value" id="profile-finance-balance">R$ 0,00</span>
+                    </div>
+                </div>
+                <div class="finance-breakdown">
+                    <div class="breakdown-header">
+                        <span>Top despesas por categoria</span>
+                        <span class="breakdown-meta">Mais atual</span>
+                    </div>
+                    <div class="breakdown-list" id="profile-finance-breakdown"></div>
+                </div>
+            </section>
+
+            <section class="profile-section full">
+                <h3 class="section-title">Atividade recente</h3>
+                <div class="activity-list" id="profile-activity-list"></div>
+            </section>
+
+            <section class="profile-section">
+                <h3 class="section-title">Preferencias rapidas</h3>
+                <div class="preference-list" id="profile-preferences">
+                    <label class="preference-item">
+                        <span class="preference-text">
+                            <span class="preference-title">Notificações</span>
+                            <span class="preference-desc">Alertas de tarefas e finanças</span>
+                        </span>
+                        <span class="preference-control">
+                            <input type="checkbox" class="preference-toggle" data-pref="notifications" checked>
+                            <span class="preference-switch"></span>
+                        </span>
+                    </label>
+                    <label class="preference-item">
+                        <span class="preference-text">
+                            <span class="preference-title">Resumo semanal</span>
+                            <span class="preference-desc">Receber resumo de performance</span>
+                        </span>
+                        <span class="preference-control">
+                            <input type="checkbox" class="preference-toggle" data-pref="weekly_summary" checked>
+                            <span class="preference-switch"></span>
+                        </span>
+                    </label>
+                    <label class="preference-item">
+                        <span class="preference-text">
+                            <span class="preference-title">Lembretes de vencimento</span>
+                            <span class="preference-desc">Avisos antes do prazo</span>
+                        </span>
+                        <span class="preference-control">
+                            <input type="checkbox" class="preference-toggle" data-pref="due_reminders" checked>
+                            <span class="preference-switch"></span>
+                        </span>
+                    </label>
+                    <label class="preference-item">
+                        <span class="preference-text">
+                            <span class="preference-title">Auto-save</span>
+                            <span class="preference-desc">Salvamento autom??tico no servidor</span>
+                        </span>
+                        <span class="preference-control">
+                            <input type="checkbox" class="preference-toggle" data-pref="autosave" checked disabled>
+                            <span class="preference-switch"></span>
+                        </span>
+                    </label>
+                </div>
+            </section>
+
+            <section class="profile-section">
+                <h3 class="section-title">Segurança</h3>
+                <div class="security-list">
+                    <div class="security-item">
+                        <span class="security-label">Sessções ativa</span>
+                        <span class="security-value" id="profile-session-since">-</span>
+                    </div>
+                    <div class="security-item">
+                        <span class="security-label">hultimo login</span>
+                        <span class="security-value" id="profile-last-login">-</span>
+                    </div>
+                    <div class="security-item">
+                        <span class="security-label">Email</span>
+                        <span class="security-value" id="profile-security-email">-</span>
+                    </div>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="logout()">Encerrar sessões</button>
+            </section>
+
+            <section class="profile-section">
+                <h3 class="section-title">Dados & Backup</h3>
+                <div class="data-actions">
+                    <button class="btn btn-secondary btn-sm" onclick="exportData()">Exportar backup</button>
+                    <button class="btn btn-secondary btn-sm" onclick="document.getElementById('import-file').click()">Importar backup</button>
+                </div>
+                <p class="data-note">hultimo backup: <span id="profile-last-backup">-</span></p>
+                <p class="data-note">Relatorio avançado em breve.</p>
+            </section>
+        </div>
+        <!-- Danger Zone -->
+        <div class="profile-danger-zone">
+            <h3 class="section-title danger">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                    </path>
+                </svg>
+                Zona de Perigo
+            </h3>
+            <div class="danger-zone-content">
+                <div class="danger-zone-text">
+                    <strong>Deletar Conta</strong>
+                    <p>Uma vez deletada, sua conta não pode ser recuperada. Esta ação é permanente.</p>
+                </div>
+                <button class="btn btn-danger" onclick="confirmDeleteAccount()">
+                    🗑️ Deletar Conta
+                </button>
+            </div>
+        </div>
+    </div>
+
+
     <!-- Save Indicator -->
     <div id="save-indicator" class="save-indicator">
         <div class="spinner"></div>
@@ -23,30 +400,30 @@
             </div>
             <h2 class="auth-title">Bem-vindo de volta</h2>
             <p class="auth-subtitle">Entre com suas credenciais para acessar o sistema</p>
-            
+
             <div id="login-error" class="alert alert-error hidden"></div>
-            
+
             <form id="login-form">
                 <div class="form-group">
                     <label class="form-label">E-mail</label>
-                    <input type="email" class="form-control" id="login-email" required 
-                           placeholder="seu@email.com">
+                    <input type="email" class="form-control" id="login-email" required placeholder="seu@email.com">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Senha</label>
-                    <input type="password" class="form-control" id="login-password" required 
-                           placeholder="••••••••">
+                    <input type="password" class="form-control" id="login-password" required placeholder="••••••••">
                 </div>
                 <button type="submit" class="btn btn-primary btn-full">
                     <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1">
+                        </path>
                     </svg>
                     Entrar
                 </button>
             </form>
-            
+
             <p class="text-center text-muted mt-2" style="font-size: 0.875rem;">
-                Não tem uma conta? 
+                Não tem uma conta?
                 <button class="btn-link" onclick="showRegister()">Cadastre-se aqui</button>
             </p>
         </div>
@@ -61,42 +438,42 @@
             </div>
             <h2 class="auth-title">Criar nova conta</h2>
             <p class="auth-subtitle">Preencha os dados para começar a usar o sistema</p>
-            
+
             <div id="register-error" class="alert alert-error hidden"></div>
             <div id="register-success" class="alert alert-success hidden"></div>
-            
+
             <form id="register-form">
                 <div class="form-group">
                     <label class="form-label">Nome completo</label>
-                    <input type="text" class="form-control" id="register-name" required 
-                           placeholder="João Silva">
+                    <input type="text" class="form-control" id="register-name" required placeholder="João Silva">
                 </div>
                 <div class="form-group">
                     <label class="form-label">E-mail</label>
-                    <input type="email" class="form-control" id="register-email" required 
-                           placeholder="seu@email.com">
+                    <input type="email" class="form-control" id="register-email" required placeholder="seu@email.com">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Senha</label>
-                    <input type="password" class="form-control" id="register-password" required 
-                           placeholder="••••••••" minlength="6">
+                    <input type="password" class="form-control" id="register-password" required placeholder="••••••••"
+                        minlength="6">
                     <small class="text-muted" style="font-size: 0.75rem;">Mínimo de 6 caracteres</small>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Confirmar senha</label>
-                    <input type="password" class="form-control" id="register-password-confirm" required 
-                           placeholder="••••••••">
+                    <input type="password" class="form-control" id="register-password-confirm" required
+                        placeholder="••••••••">
                 </div>
                 <button type="submit" class="btn btn-primary btn-full">
                     <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z">
+                        </path>
                     </svg>
                     Criar Conta
                 </button>
             </form>
-            
+
             <p class="text-center text-muted mt-2" style="font-size: 0.875rem;">
-                Já tem uma conta? 
+                Já tem uma conta?
                 <button class="btn-link" onclick="showLogin()">Entrar aqui</button>
             </p>
         </div>
@@ -130,24 +507,40 @@
                     <div class="nav-section-title">Módulos</div>
                     <div class="nav-item active" onclick="switchView('tasks')">
                         <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                            </path>
                         </svg>
                         Tarefas
                         <span class="badge" id="nav-total-tasks">0</span>
                     </div>
                     <div class="nav-item" onclick="switchView('finance')">
                         <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                            </path>
                         </svg>
                         Finanças
                         <span class="badge" id="nav-balance">R$ 0</span>
                     </div>
                     <div class="nav-item" onclick="switchView('analytics')">
                         <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                            </path>
                         </svg>
                         Analytics
                     </div>
+                    <div class="nav-item" onclick="switchView('groups')">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m10-1.13a4 4 0 10-8 0m8 0a4 4 0 01-8 0">
+                            </path>
+                        </svg>
+                        Grupos
+                        <span class="badge" id="nav-groups">0</span>
+                    </div>
+                    <div id="nav-groups-list" class="nav-sublist"></div>
                 </div>
 
                 <div class="nav-section">
@@ -161,14 +554,16 @@
                     </div>
                     <div class="nav-item" onclick="filterTasksByStatus('inProgress')">
                         <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                         Em Progresso
                         <span class="badge" id="nav-progress">0</span>
                     </div>
                     <div class="nav-item" onclick="filterTasksByStatus('completed')">
                         <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                         Concluídas
                         <span class="badge" id="nav-completed">0</span>
@@ -179,24 +574,29 @@
                     <div class="nav-section-title">Dados</div>
                     <div class="nav-item" onclick="exportData()">
                         <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                         </svg>
                         Exportar Backup
                     </div>
                     <div class="nav-item" onclick="document.getElementById('import-file').click()">
                         <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
                         </svg>
                         Importar Backup
                     </div>
-                    <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importData(event)">
+                    <input type="file" id="import-file" accept=".json" style="display: none;"
+                        onchange="importData(event)">
                 </div>
             </nav>
 
             <div class="sidebar-footer">
                 <button class="btn btn-danger btn-full" onclick="logout()">
                     <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
+                        </path>
                     </svg>
                     Sair
                 </button>
@@ -217,7 +617,9 @@
                     <div class="header-actions">
                         <button class="btn btn-success btn-sm" onclick="syncDatabase()">
                             <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                                </path>
                             </svg>
                             Sincronizar
                         </button>
@@ -260,8 +662,8 @@
                         </select>
                     </div>
                     <div class="filter-group" style="margin-left: auto;">
-                        <input type="text" id="task-search-input" placeholder="Buscar tarefas..." 
-                               style="width: 250px;" onkeyup="renderTasks()">
+                        <input type="text" id="task-search-input" placeholder="Buscar tarefas..." style="width: 250px;"
+                            onkeyup="renderTasks()">
                     </div>
                 </div>
 
@@ -299,7 +701,9 @@
                 <div class="budget-section">
                     <h3 class="section-title">
                         <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+                            </path>
                         </svg>
                         Orçamento por Categoria
                     </h3>
@@ -308,7 +712,9 @@
 
                 <h3 class="section-title" style="margin-top: 2rem;">
                     <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                        </path>
                     </svg>
                     Histórico de Transações
                 </h3>
@@ -339,12 +745,175 @@
                         </select>
                     </div>
                     <div class="filter-group" style="margin-left: auto;">
-                        <input type="text" id="finance-search-input" placeholder="Buscar transações..." 
-                               style="width: 250px;" onkeyup="renderTransactions()">
+                        <input type="text" id="finance-search-input" placeholder="Buscar transações..."
+                            style="width: 250px;" onkeyup="renderTransactions()">
                     </div>
                 </div>
 
                 <div id="transactions-container"></div>
+            </div>
+
+            <!-- Groups View -->
+            <div id="groups-view" style="display: none;">
+                <div class="header">
+                    <div>
+                        <h2>Grupos</h2>
+                        <p class="text-muted" style="font-size: 0.875rem; margin-top: 0.25rem;">
+                            Crie grupos e convide pessoas para colaborar
+                        </p>
+                    </div>
+                </div>
+
+                <div class="group-layout">
+                    <section class="group-panel">
+                        <div class="group-create-card">
+                            <h3 class="section-title">Criar grupo</h3>
+                            <div class="form-group">
+                                <label>Nome do grupo</label>
+                                <input type="text" id="group-name-input" placeholder="Ex: Time de projetos">
+                            </div>
+                            <div class="form-group">
+                                <label>Descricao</label>
+                                <textarea id="group-description-input" rows="3"
+                                    placeholder="Qual o objetivo desse grupo?"></textarea>
+                            </div>
+                            <button class="btn btn-primary btn-full" onclick="createGroup()">Criar grupo</button>
+                        </div>
+
+                        <div class="panel-header">
+                            <h3 class="section-title">Seus grupos</h3>
+                            <span class="section-pill" id="groups-count">0</span>
+                        </div>
+                        <div id="groups-list" class="groups-grid"></div>
+                    </section>
+
+                    <section class="group-panel">
+                        <div class="panel-header">
+                            <h3 class="section-title">Detalhes</h3>
+                            <span class="section-pill" id="group-details-status">Selecione um grupo</span>
+                        </div>
+
+                        <div id="group-details-empty" class="empty-state">
+                            <svg class="empty-state-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m10-1.13a4 4 0 10-8 0m8 0a4 4 0 01-8 0">
+                                </path>
+                            </svg>
+                            <h3 style="margin-bottom: 0.5rem;">Nenhum grupo selecionado</h3>
+                            <p>Escolha um grupo ao lado para ver membros e convites.</p>
+                        </div>
+
+                        <div id="group-details" class="group-details hidden">
+                            <div class="group-details-header">
+                                <div>
+                                    <div class="group-details-title" id="group-details-name">Grupo</div>
+                                    <div class="group-details-meta" id="group-details-description"></div>
+                                </div>
+                                <div class="group-details-actions" id="group-details-actions"></div>
+                            </div>
+
+                            <div class="group-details-grid">
+                                <div class="group-members-card">
+                                    <div class="group-card-header">
+                                        <h4>Membros</h4>
+                                        <span class="section-pill" id="group-members-count">0</span>
+                                    </div>
+                                    <div id="group-members-list" class="group-members-list"></div>
+                                </div>
+                                <div class="group-invite-card">
+                                    <h4>Convidar pessoa</h4>
+                                    <div class="form-group">
+                                        <label>Email</label>
+                                        <input type="email" id="group-invite-email"
+                                            placeholder="email@exemplo.com">
+                                    </div>
+                                    <button class="btn btn-secondary btn-full" onclick="inviteGroupMember()">Adicionar</button>
+                                    <p class="text-muted" style="font-size: 0.75rem; margin-top: 0.75rem;">
+                                        A pessoa precisa ter conta criada.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- Group Page View -->
+            <div id="group-page-view" style="display: none;">
+                <div class="header">
+                    <div>
+                        <h2 id="group-page-title">Grupo</h2>
+                        <p class="text-muted" id="group-page-subtitle" style="font-size: 0.875rem; margin-top: 0.25rem;">
+                            Detalhes do grupo
+                        </p>
+                        <div class="group-page-avatars" id="group-page-avatars"></div>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" onclick="switchView('groups')">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                            Voltar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="group-page-grid">
+                    <section class="group-page-tasks">
+                        <div class="group-page-tasks-header">
+                            <h3 class="section-title">Tarefas do grupo</h3>
+                            <button class="btn btn-primary btn-sm" onclick="openGroupTaskModal()">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                Nova tarefa
+                            </button>
+                        </div>
+                        <div class="filters group-task-filters">
+                            <div class="filter-group">
+                                <span class="filter-label">Ordenar:</span>
+                                <select id="group-task-sort-select" onchange="renderGroupTasks()">
+                                    <option value="date-desc">Mais Recentes</option>
+                                    <option value="date-asc">Mais Antigas</option>
+                                    <option value="priority-high">Prioridade Alta</option>
+                                    <option value="priority-low">Prioridade Baixa</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <span class="filter-label">Status:</span>
+                                <select id="group-task-status-filter" onchange="renderGroupTasks()">
+                                    <option value="all">Todos</option>
+                                    <option value="todo">Pendentes</option>
+                                    <option value="inProgress">Em Progresso</option>
+                                    <option value="completed">Concluidas</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <span class="filter-label">Prioridade:</span>
+                                <select id="group-task-priority-filter" onchange="renderGroupTasks()">
+                                    <option value="all">Todas</option>
+                                    <option value="critical">Critica</option>
+                                    <option value="high">Alta</option>
+                                    <option value="medium">Media</option>
+                                    <option value="low">Baixa</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <span class="filter-label">Responsavel:</span>
+                                <select id="group-task-assignee-filter" onchange="renderGroupTasks()">
+                                    <option value="all">Todos</option>
+                                    <option value="unassigned">Sem responsavel</option>
+                                </select>
+                            </div>
+                            <div class="filter-group" style="margin-left: auto;">
+                                <input type="text" id="group-task-search-input" placeholder="Buscar tarefas..."
+                                    style="width: 250px;" onkeyup="renderGroupTasks()">
+                            </div>
+                        </div>
+                        <div id="group-tasks-container"></div>
+                    </section>
+                </div>
             </div>
 
             <!-- Analytics View -->
@@ -406,13 +975,19 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <label class="form-label">Título da Tarefa *</label>
-                        <input type="text" class="form-control" id="task-title-input" required 
-                               placeholder="Digite o título da tarefa...">
+                        <input type="text" class="form-control" id="task-title-input" required
+                            placeholder="Digite o título da tarefa...">
+                    </div>
+                    <div class="form-group" id="task-assignee-group">
+                        <label class="form-label">Responsaveis</label>
+                        <div class="assignee-grid" id="task-assignee-grid"></div>
+                        <input type="hidden" id="task-assignee-input" value="">
+                        <p class="form-hint">Clique nos membros para selecionar.</p>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Descrição</label>
-                        <textarea class="form-control" id="task-description-input" 
-                                  placeholder="Adicione detalhes sobre a tarefa..."></textarea>
+                        <textarea class="form-control" id="task-description-input"
+                            placeholder="Adicione detalhes sobre a tarefa..."></textarea>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Prioridade *</label>
@@ -465,16 +1040,16 @@
                             💸 Despesa
                         </button>
                     </div>
-                    
+
                     <div class="form-group">
                         <label class="form-label">Descrição *</label>
-                        <input type="text" class="form-control" id="finance-description-input" required 
-                               placeholder="Ex: Salário, Mercado, Aluguel...">
+                        <input type="text" class="form-control" id="finance-description-input" required
+                            placeholder="Ex: Salário, Mercado, Aluguel...">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Valor *</label>
-                        <input type="number" step="0.01" class="form-control" id="finance-amount-input" required 
-                               placeholder="0.00">
+                        <input type="number" step="0.01" class="form-control" id="finance-amount-input" required
+                            placeholder="0.00">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Categoria *</label>
@@ -488,8 +1063,8 @@
                     </div>
                     <div class="form-group mb-0">
                         <label class="form-label">Notas</label>
-                        <textarea class="form-control" id="finance-notes-input" 
-                                  placeholder="Informações adicionais (opcional)..."></textarea>
+                        <textarea class="form-control" id="finance-notes-input"
+                            placeholder="Informações adicionais (opcional)..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -526,7 +1101,7 @@
                         <span class="budget-info-value" id="budget-remaining">R$ 0,00</span>
                     </div>
                 </div>
-                
+
                 <div id="budget-allocations-container" class="budget-allocations-container">
                     <!-- Budget allocations will be rendered here -->
                 </div>
@@ -538,6 +1113,7 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js?v=20260127"></script>
 </body>
+
 </html>
