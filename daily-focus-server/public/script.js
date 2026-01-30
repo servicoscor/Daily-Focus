@@ -1689,7 +1689,7 @@ async function saveTask() {
     const pageGroupId = Number.isNaN(rawPageGroupId) ? null : rawPageGroupId;
     const isOnGroupPage = currentView === 'group-page';
     const isGroupPageVisible = groupPageView && getComputedStyle(groupPageView).display !== 'none';
-    const isGroupTask = formScope === 'group' || currentTaskScope === 'group' || isOnGroupPage || isGroupPageVisible || !!pageGroupId;
+    const isGroupTask = formScope === 'group' || currentTaskScope === 'group' || isOnGroupPage || isGroupPageVisible;
     const taskList = isGroupTask ? groupTasks : tasks;
     const assigneeInput = document.getElementById('task-assignee-input');
     const selectedAssignees = isGroupTask && assigneeInput && assigneeInput.value
